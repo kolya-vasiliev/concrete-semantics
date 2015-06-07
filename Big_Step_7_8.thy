@@ -1,6 +1,6 @@
 (* Author: Gerwin Klein, Tobias Nipkow *)
 
-theory Big_Step imports Com begin
+theory Big_Step_7_8 imports Com_7_8 begin
 
 subsection "Big-Step Semantics of Commands"
 
@@ -22,7 +22,12 @@ IfFalse: "\<lbrakk> \<not>bval b s;  (c\<^sub>2,s) \<Rightarrow> t \<rbrakk> \<L
 WhileFalse: "\<not>bval b s \<Longrightarrow> (WHILE b DO c,s) \<Rightarrow> s" |
 WhileTrue:
 "\<lbrakk> bval b s\<^sub>1;  (c,s\<^sub>1) \<Rightarrow> s\<^sub>2;  (WHILE b DO c, s\<^sub>2) \<Rightarrow> s\<^sub>3 \<rbrakk> 
-\<Longrightarrow> (WHILE b DO c, s\<^sub>1) \<Rightarrow> s\<^sub>3"
+\<Longrightarrow> (WHILE b DO c, s\<^sub>1) \<Rightarrow> s\<^sub>3" |
+RepeatTrue: "\<lbrakk> bval b t;  (c, s) \<Rightarrow> t \<rbrakk> \<Longrightarrow> (REPEAT c UNTIL b, s) \<Rightarrow> t" |
+RepeatFalse: 
+"\<lbrakk> \<not>bval b s\<^sub>2;  (c, s\<^sub>1) \<Rightarrow> s\<^sub>2;  (REPEAT c UNTIL b, s\<^sub>2) \<Rightarrow> s\<^sub>3  \<rbrakk> 
+\<Longrightarrow> (REPEAT c UNTIL b, s\<^sub>1) \<Rightarrow> s\<^sub>3"
+
 text_raw{*}%endsnip*}
 
 text_raw{*\snip{BigStepEx}{1}{2}{% *}
@@ -56,6 +61,9 @@ values "{map t [''x'',''y''] |t.
   (WHILE Less (V ''x'') (V ''y'') DO (''x'' ::= Plus (V ''x'') (N 5)),
    <''x'' := 0, ''y'' := 13>) \<Rightarrow> t}"
 
+values "{map t [''x'',''y''] |t.
+  (REPEAT (''x'' ::= Plus (V ''x'') (N 5)) UNTIL Less  (V ''y'') (V ''x''),
+   <''x'' := 0, ''y'' := 13>) \<Rightarrow> t}"
 
 text{* Proof automation: *}
 
@@ -109,6 +117,8 @@ inductive_cases WhileE[elim]: "(WHILE b DO c,s) \<Rightarrow> t"
 thm WhileE
 text{* Only [elim]: [elim!] would not terminate. *}
 
+inductive_cases RepeatE[elim]: "(REPEAT c UNTIL b,s) \<Rightarrow> t"
+thm RepeatE
 text{* An automatic example: *}
 
 text{* Rule inversion by hand via the ``cases'' method: *}
